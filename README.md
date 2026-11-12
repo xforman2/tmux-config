@@ -43,7 +43,12 @@ Prefix is `Ctrl-Space` (`Ctrl-b` works too). `prefix ?` lists every binding.
 | Detach | `prefix d` |
 | Save / restore sessions now | `prefix Ctrl-s` / `prefix Ctrl-r` |
 
-`t` in the shell attaches to the `main` session, creating it if needed.
+## Shell
+
+- `tmux` with no arguments attaches and opens the session list instead of creating a new
+  session every time. With no sessions yet, it starts one. With arguments it is plain tmux.
+- `t` attaches to the `main` session, creating it if needed.
+- `Ctrl-f` opens the sessionizer.
 
 ## Sessions after a reboot
 

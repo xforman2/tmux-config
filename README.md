@@ -45,8 +45,8 @@ Prefix is `Ctrl-Space` (`Ctrl-b` works too). `prefix ?` lists every binding.
 
 ## Shell
 
-- `tmux` with no arguments attaches and opens the session list instead of creating a new
-  session every time. With no sessions yet, it starts one. With arguments it is plain tmux.
+- `tmux` with no arguments opens the sessionizer instead of creating an unnamed session every
+  time. With arguments it is plain tmux.
 - `t` attaches to the `main` session, creating it if needed.
 - `Ctrl-f` opens the sessionizer.
 

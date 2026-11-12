@@ -32,16 +32,13 @@ fi
 # tmux does not allow "." or ":" in session names
 name=$(basename "$selected" | tr '.:' '__')
 
-if [[ -z ${TMUX:-} ]] && ! pgrep -x tmux > /dev/null; then
-    exec tmux new-session -s "$name" -c "$selected"
+# Outside tmux: attach to the session, creating it (and the server) if needed
+if [[ -z ${TMUX:-} ]]; then
+    exec tmux new-session -A -s "$name" -c "$selected"
 fi
 
+# Inside tmux: create the session in the background if needed, then switch to it
 if ! tmux has-session -t="$name" 2> /dev/null; then
     tmux new-session -ds "$name" -c "$selected"
 fi
-
-if [[ -z ${TMUX:-} ]]; then
-    exec tmux attach-session -t "$name"
-else
-    tmux switch-client -t "$name"
-fi
+tmux switch-client -t "$name"

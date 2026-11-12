@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# tmux-sessionizer: pick a project folder with fzf and open a tmux session for it.
+# If a session for that folder already exists, switch to it instead.
+#
+# Usage:
+#   tmux-sessionizer          pick a folder with fzf
+#   tmux-sessionizer <dir>    open <dir> directly
+#
+# Folders searched (one level deep) come from TMUX_SESSIONIZER_PATHS,
+# a colon-separated list. Default: ~/projects
+
+set -euo pipefail
+
+if [[ $# -eq 1 ]]; then
+    selected=$(realpath "$1")
+else
+    IFS=: read -r -a roots <<< "${TMUX_SESSIONIZER_PATHS:-$HOME/projects}"
+    existing=()
+    for root in "${roots[@]}"; do
+        [[ -d $root ]] && existing+=("$root")
+    done
+    if [[ ${#existing[@]} -eq 0 ]]; then
+        echo "tmux-sessionizer: none of these folders exist: ${roots[*]}" >&2
+        exit 1
+    fi
+    selected=$(find "${existing[@]}" -mindepth 1 -maxdepth 1 -type d -not -name '.*' \
+        | sort | fzf --prompt="project> ") || exit 0
+fi
+
+[[ -z $selected ]] && exit 0
+
+# tmux does not allow "." or ":" in session names
+name=$(basename "$selected" | tr '.:' '__')
+
+if [[ -z ${TMUX:-} ]] && ! pgrep -x tmux > /dev/null; then
+    exec tmux new-session -s "$name" -c "$selected"
+fi
+
+if ! tmux has-session -t="$name" 2> /dev/null; then
+    tmux new-session -ds "$name" -c "$selected"
+fi
+
+if [[ -z ${TMUX:-} ]]; then
+    exec tmux attach-session -t "$name"
+else
+    tmux switch-client -t "$name"
+fi
